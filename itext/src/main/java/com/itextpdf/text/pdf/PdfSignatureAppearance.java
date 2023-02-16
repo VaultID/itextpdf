@@ -111,7 +111,7 @@ public class PdfSignatureAppearance {
 
     /** Author signature, form filling and annotations allowed */
     public static final int CERTIFIED_FORM_FILLING_AND_ANNOTATIONS = 3;
-
+    
     /** The certification level */
     private int certificationLevel = NOT_CERTIFIED;
 
@@ -148,6 +148,9 @@ public class PdfSignatureAppearance {
 
     /** Holds value of property signDate. */
     private Calendar signDate;
+    
+    private boolean signAllPages = false;
+
 
     /**
      * Gets the signing reason.
@@ -251,6 +254,14 @@ public class PdfSignatureAppearance {
         this.signDate = signDate;
     }
 
+    /**
+     * Sets if sign all pages or not
+     * @param signAllPages
+     */
+    public void setSignAllPages(boolean signAllPages) {
+        this.signAllPages = signAllPages;
+    }
+    
     // the PDF file
 
     /** The file right before the signature is added (can be null). */
@@ -1279,9 +1290,24 @@ public class PdfSignatureAppearance {
                 sigField.setWidget(getPageRect(), null);
             else
                 sigField.setWidget(new Rectangle(0, 0), null);
-            sigField.setAppearance(PdfAnnotation.APPEARANCE_NORMAL, getAppearance());
-            sigField.setPage(pagen);
-            writer.addAnnotation(sigField, pagen);
+            
+            if(this.signAllPages){
+                
+                for (int pg = 1; pg <= writer.reader.getNumberOfPages(); pg++) {
+                    
+                    sigField.setAppearance(PdfAnnotation.APPEARANCE_NORMAL, getAppearance());
+                    sigField.setPage(pg);
+                    writer.addAnnotation(sigField, pg);
+                    
+                }
+
+            }else{
+            
+                sigField.setAppearance(PdfAnnotation.APPEARANCE_NORMAL, getAppearance());
+                sigField.setPage(pagen);
+                writer.addAnnotation(sigField, pagen);
+            
+            }
         }
 
         exclusionLocations = new HashMap<PdfName, PdfLiteral>();
